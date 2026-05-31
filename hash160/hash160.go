@@ -5,7 +5,7 @@ package hash160
 import (
 	"crypto/sha256"
 
-	"github.com/davidzita/ripemd160mb"
+	"github.com/Asylian21/ripemd160-asm"
 )
 
 // Hash160_32 computes the Bitcoin-style HASH160 of n fixed-width messages.
@@ -24,7 +24,7 @@ import (
 // call, and it computes SHA-256 with crypto/sha256. High-throughput pipelines
 // should instead compute the SHA-256 digests themselves — for example with a
 // vectorized SHA-256 implementation — into a reusable n*32 buffer and call
-// [github.com/davidzita/ripemd160mb.Hash32] directly, which allocates nothing
+// [github.com/Asylian21/ripemd160-asm.Hash32] directly, which allocates nothing
 // and is safe for concurrent use. See the package example for that pattern.
 func Hash160_32(dst, src []byte, n, width int) {
 	if n < 0 {

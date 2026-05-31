@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/davidzita/ripemd160mb"
-	"github.com/davidzita/ripemd160mb/hash160"
+	"github.com/Asylian21/ripemd160-asm"
+	"github.com/Asylian21/ripemd160-asm/hash160"
 )
 
 // BenchmarkHash160_32 measures the combined SHA-256 + RIPEMD-160 pipeline across

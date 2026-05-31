@@ -1,8 +1,8 @@
 # ripemd160mb
 
-[Go Reference](https://pkg.go.dev/github.com/davidzita/ripemd160mb)
-[CI](https://github.com/davidzita/ripemd160mb/actions/workflows/ci.yml)
-[Go Report Card](https://goreportcard.com/report/github.com/davidzita/ripemd160mb)
+[Go Reference](https://pkg.go.dev/github.com/Asylian21/ripemd160-asm)
+[CI](https://github.com/Asylian21/ripemd160-asm/actions/workflows/ci.yml)
+[Go Report Card](https://goreportcard.com/report/github.com/Asylian21/ripemd160-asm)
 [License: MIT](LICENSE)
 [Free & Open Source](LICENSE)
 
@@ -64,29 +64,29 @@ RIPEMD-160 use.
 ## Install
 
 ```sh
-go get github.com/davidzita/ripemd160mb@v0.1.0
+go get github.com/Asylian21/ripemd160-asm@v0.1.0
 ```
 
 Import the root package for RIPEMD-160:
 
 ```go
-import "github.com/davidzita/ripemd160mb"
+import "github.com/Asylian21/ripemd160-asm"
 ```
 
 Import the optional HASH160 helper when you want SHA-256 plus RIPEMD-160 in one
 convenience call:
 
 ```go
-import "github.com/davidzita/ripemd160mb/hash160"
+import "github.com/Asylian21/ripemd160-asm/hash160"
 ```
 
 To build against a local checkout before a release tag is available, add a
 temporary `replace` directive to the consumer's `go.mod`:
 
 ```go
-require github.com/davidzita/ripemd160mb v0.0.0
+require github.com/Asylian21/ripemd160-asm v0.0.0
 
-replace github.com/davidzita/ripemd160mb => /path/to/RIPEMD-160-Assembly
+replace github.com/Asylian21/ripemd160-asm => /path/to/RIPEMD-160-Assembly
 ```
 
 ## Quick Start
@@ -100,7 +100,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/davidzita/ripemd160mb"
+	"github.com/Asylian21/ripemd160-asm"
 )
 
 func main() {
@@ -131,8 +131,8 @@ The `hash160` subpackage computes Bitcoin-style
 
 ```go
 import (
-	"github.com/davidzita/ripemd160mb"
-	"github.com/davidzita/ripemd160mb/hash160"
+	"github.com/Asylian21/ripemd160-asm"
+	"github.com/Asylian21/ripemd160-asm/hash160"
 )
 
 const (

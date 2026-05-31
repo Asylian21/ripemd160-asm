@@ -6,8 +6,8 @@ import (
 	"crypto/sha256"
 	"testing"
 
-	"github.com/davidzita/ripemd160mb"
-	"github.com/davidzita/ripemd160mb/hash160"
+	"github.com/Asylian21/ripemd160-asm"
+	"github.com/Asylian21/ripemd160-asm/hash160"
 )
 
 // manualHash160 computes RIPEMD160(SHA256(msg)) using the standard library and

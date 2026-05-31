@@ -33,7 +33,7 @@ import (
 // modulePath is the import path of the module that owns the generated file. It
 // is used to verify the resolved repository root before writing, so a wrong
 // working directory fails loudly instead of silently writing outside the repo.
-const modulePath = "github.com/davidzita/ripemd160mb"
+const modulePath = "github.com/Asylian21/ripemd160-asm"
 
 var rl = [80]int{
 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,

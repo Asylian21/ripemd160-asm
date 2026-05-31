@@ -5,8 +5,8 @@ import (
 	"crypto/sha256"
 	"fmt"
 
-	"github.com/davidzita/ripemd160mb"
-	"github.com/davidzita/ripemd160mb/hash160"
+	"github.com/Asylian21/ripemd160-asm"
+	"github.com/Asylian21/ripemd160-asm/hash160"
 )
 
 func main() {

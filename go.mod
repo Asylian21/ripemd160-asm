@@ -1,4 +1,4 @@
-module github.com/davidzita/ripemd160mb
+module github.com/Asylian21/ripemd160-asm
 
 go 1.22
 

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/davidzita/ripemd160mb"
+	"github.com/Asylian21/ripemd160-asm"
 )
 
 // ExampleSum hashes a single message with the one-shot helper.
