@@ -1,0 +1,95 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goarch: amd64
+          - os: ubuntu-24.04-arm
+            goarch: arm64
+          - os: macos-14
+            goarch: arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+      - run: go test ./...
+        env:
+          GOARCH: ${{ matrix.goarch }}
+      - run: GORIPEMD160MB_FORCE=scalar go test ./...
+        env:
+          GOARCH: ${{ matrix.goarch }}
+      - run: go test -race ./...
+        env:
+          GOARCH: ${{ matrix.goarch }}
+      - run: go test -run '^$' -bench Hash32 -benchtime=100ms ./...
+        env:
+          GOARCH: ${{ matrix.goarch }}
+
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+      - run: test -z "$(gofmt -l .)"
+      - run: go vet ./...
+      - run: go install honnef.co/go/tools/cmd/staticcheck@2024.1.1
+      - run: staticcheck ./...
+      - run: go generate ./...
+      - run: git diff --exit-code
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+      # Cover the importable library packages only; the NEON generator
+      # (internal/neongen) and the runnable example are validated by the
+      # quality and cross-build jobs rather than statement coverage.
+      - name: Run tests with coverage
+        run: go test -covermode=atomic -coverprofile=coverage.out ./ ./hash160
+      - name: Enforce coverage threshold
+        run: |
+          total=$(go tool cover -func=coverage.out | awk '/^total:/ {sub(/%/, "", $3); print $3}')
+          threshold=95.0
+          echo "library coverage: ${total}% (threshold ${threshold}%)"
+          awk -v c="$total" -v t="$threshold" 'BEGIN { exit (c+0 >= t+0) ? 0 : 1 }' \
+            || { echo "::error::coverage ${total}% is below the ${threshold}% threshold"; exit 1; }
+
+  fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+      # Short smoke fuzzing to catch regressions in the corpus and the
+      # differential oracles; longer campaigns run out of band.
+      - run: go test -run '^$' -fuzz '^FuzzSum$' -fuzztime=20s .
+      - run: go test -run '^$' -fuzz '^FuzzHash32$' -fuzztime=20s .
+      - run: go test -run '^$' -fuzz '^FuzzHash160_32$' -fuzztime=20s ./hash160
+
+  cross-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.x'
+      - run: GOOS=linux GOARCH=amd64 go test -exec=true ./...
+      - run: GOOS=linux GOARCH=arm64 go test -exec=true ./...
+      - run: GOOS=linux GOARCH=386 go test -exec=true ./...
+      - run: GOOS=linux GOARCH=ppc64le go test -exec=true ./...

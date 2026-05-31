@@ -1,0 +1,10 @@
+.DS_Store
+*.test
+coverage.out
+coverage.html
+*.cover
+*.prof
+cpu.out
+mem.out
+dist/
+tmp/
