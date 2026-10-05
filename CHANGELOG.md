@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased - 2026-10-04
+## v0.2.0 - 2026-10-05
 
 - Shorter base NEON boolean sequences and independent preparation of the
   message/additive terms reduce the round dependency chain.

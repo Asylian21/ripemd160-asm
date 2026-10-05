@@ -65,7 +65,7 @@ RIPEMD-160 use.
 ## Install
 
 ```sh
-go get github.com/Asylian21/ripemd160-asm@v0.1.0
+go get github.com/Asylian21/ripemd160-asm@v0.2.0
 ```
 
 Import the root package for RIPEMD-160:
