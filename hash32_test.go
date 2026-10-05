@@ -53,6 +53,37 @@ func TestHash32MatchesReference(t *testing.T) {
 	}
 }
 
+// Carry-heavy and alternating-bit messages exercise the complemented boolean
+// operations in the SHA3 kernel. Unaligned buffers and tails also stress the
+// SIMD loads, lane ordering, and exact output bounds.
+func TestHash32BitPatterns(t *testing.T) {
+	for _, name := range availableBackendsForTest() {
+		withBackend(t, name, func() {
+			for _, n := range []int{3, 4, 5, 7, 8, 9, 17, 257} {
+				for _, pattern := range []byte{0, 0xff, 0xaa, 0x55} {
+					srcBacking := make([]byte, n*32+2)
+					src := srcBacking[1 : n*32+1]
+					for i := range src {
+						src[i] = pattern
+					}
+					dstBacking := bytes.Repeat([]byte{0xcd}, n*Size+2)
+					dst := dstBacking[1 : n*Size+1]
+					Hash32(dst, src, n)
+					if dstBacking[0] != 0xcd || dstBacking[len(dstBacking)-1] != 0xcd {
+						t.Fatalf("backend=%s n=%d wrote outside output", name, n)
+					}
+					for i := 0; i < n; i++ {
+						want := referenceSum(src[i*32 : (i+1)*32])
+						if !bytes.Equal(dst[i*Size:(i+1)*Size], want) {
+							t.Fatalf("backend=%s n=%d lane=%d pattern=%02x mismatch", name, n, i, pattern)
+						}
+					}
+				}
+			}
+		})
+	}
+}
+
 // TestHash32AgreesWithSum verifies that the batched fast path and the
 // single-message Sum entry point are interchangeable for 32-byte inputs across
 // every backend, which is the invariant Hash160 pipelines rely on.
@@ -81,6 +112,26 @@ func TestHash32Zero(t *testing.T) {
 	Hash32(dst, nil, 0)
 	if !bytes.Equal(dst, []byte{0x11, 0x22, 0x33}) {
 		t.Fatalf("Hash32(n=0) modified dst: %x", dst)
+	}
+}
+
+// Length products must not wrap before validation. In particular, maxInt/2+1
+// wraps both byte lengths to zero and used to allow an invalid assembly call.
+func TestHash32RejectsOverflowingCounts(t *testing.T) {
+	maxInt := int(^uint(0) >> 1)
+	for _, name := range availableBackendsForTest() {
+		withBackend(t, name, func() {
+			for _, n := range []int{maxInt/32 + 1, maxInt/Size + 1, maxInt/2 + 1, maxInt} {
+				func() {
+					defer func() {
+						if recover() == nil {
+							t.Fatalf("backend=%s n=%d: expected short-buffer panic", name, n)
+						}
+					}()
+					Hash32(make([]byte, Size), make([]byte, 32), n)
+				}()
+			}
+		})
 	}
 }
 
@@ -138,6 +189,8 @@ func FuzzHash32(f *testing.F) {
 		nil,
 		make([]byte, 32),
 		bytes.Repeat([]byte{0xFF}, 32),
+		make([]byte, 4*32),
+		bytes.Repeat([]byte{0xFF}, 9*32),
 		bytes.Repeat([]byte("seed"), 40),
 	} {
 		f.Add(seed)

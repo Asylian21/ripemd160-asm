@@ -65,7 +65,8 @@ Validate performance claims with `benchstat`, not single runs.
 
 ## Generated assembly — do not hand-edit
 
-The arm64 NEON kernel is generated. The generator source is
+The base NEON kernel, optional SHA3 kernel, and fixed-width scalar compressor
+are generated. The generator source is
 [`internal/neongen/`](internal/neongen), and the `go:generate` directive lives
 in [`generate.go`](generate.go). Regenerate with:
 
@@ -73,8 +74,10 @@ in [`generate.go`](generate.go). Regenerate with:
 go generate ./...
 ```
 
-Do not edit `block_arm64.s` by hand — change `internal/neongen` and rerun
-`go generate`. CI runs `go generate ./...` followed by `git diff --exit-code`,
+Do not edit `block_arm64.s`, `block_sha3_arm64.s`, `block8_arm64.s`,
+`block8_sha3_arm64.s`, or `scalar32_generated.go` by hand — change
+`internal/neongen` and rerun `go generate`.
+CI runs `go generate ./...` followed by `git diff --exit-code`,
 so any drift between the generator and the committed output fails the build.
 
 Any new vector kernel (for example an amd64 SSE2/AVX2/AVX-512 backend) must be

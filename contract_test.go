@@ -21,6 +21,9 @@ func TestHash32DefaultBackendIsFastestAvailable(t *testing.T) {
 	want := "scalar"
 	if runtime.GOARCH == "arm64" {
 		want = "neon"
+		if sha3Available() {
+			want = "neon-sha3"
+		}
 	}
 	if got := bestBackend().name; got != want {
 		t.Fatalf("bestBackend() = %q, want %q on %s", got, want, runtime.GOARCH)

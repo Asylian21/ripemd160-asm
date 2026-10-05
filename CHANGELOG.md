@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased - 2026-10-04
+
+- Shorter base NEON boolean sequences and independent preparation of the
+  message/additive terms reduce the round dependency chain.
+- Optional `neon-sha3` backend uses EOR3 and BCAX with complemented round
+  functions and adjusted constants. Both automatic and forced selection
+  require a positive CPU capability check.
+- Generated, unrolled fixed-32 scalar hashing removes schedule-table lookups,
+  dynamic rotations, and round branches. `Sum` uses it for 32-byte messages.
+- Public signatures, digest results, zero-allocation `Hash32`, base NEON, and
+  arbitrary-length streaming behavior are preserved.
+- Validate counts before byte-length multiplication, so oversized positive
+  counts cannot overflow the buffer checks and enter an assembly kernel.
+- Independent-oracle bit-pattern, unaligned-buffer, guard, lane/tail, and
+  feature-dispatch tests cover the new kernel. Local M5 Pro evidence is saved
+  in `benchmarks/2026-10-04`; other processors have not been speed-tested.
+
 ## v0.1.0 - 2026-05-30
 
 First tagged release. The library is correctness-verified against the

@@ -40,17 +40,19 @@ func Hash32(dst, src []byte, n int) {
 	if n < 0 {
 		panic("ripemd160mb: negative message count")
 	}
-	needSrc := n * 32
-	needDst := n * Size
-	if len(src) < needSrc {
+	// Compare counts before multiplying: a large positive n must not wrap
+	// either byte length and reach an assembly kernel with invalid buffers.
+	if n > len(src)/32 {
 		panic(fmt.Sprintf("ripemd160mb: src too short for %d 32-byte messages", n))
 	}
-	if len(dst) < needDst {
+	if n > len(dst)/Size {
 		panic(fmt.Sprintf("ripemd160mb: dst too short for %d RIPEMD-160 digests", n))
 	}
 	if n == 0 {
 		return
 	}
+	needSrc := n * 32
+	needDst := n * Size
 
 	b := active
 	if b.lanes <= 1 {
@@ -83,6 +85,11 @@ func HashEach(dst [][Size]byte, src [][]byte) {
 
 // Sum returns the RIPEMD-160 digest of p.
 func Sum(p []byte) [Size]byte {
+	if len(p) == 32 {
+		var out [Size]byte
+		sum32(out[:], p)
+		return out
+	}
 	var d digest
 	d.Reset()
 	_, _ = d.Write(p)

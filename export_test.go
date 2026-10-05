@@ -10,11 +10,15 @@ func forceBackendForTest(name string) (restore func()) {
 
 // availableBackendsForTest lists the backends that are actually implemented and
 // runnable on the current build, so the matrix tests only exercise real
-// kernels. Scalar is always present; neon is present on arm64.
+// kernels. Scalar is always present, neon is present on arm64, and neon-sha3
+// is only exposed when the CPU feature probe succeeds.
 func availableBackendsForTest() []string {
 	names := []string{"scalar"}
 	if runtime.GOARCH == "arm64" {
 		names = append(names, "neon")
+		if sha3Available() {
+			names = append(names, "neon-sha3")
+		}
 	}
 	return names
 }

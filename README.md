@@ -11,9 +11,10 @@ Bitcoin-style HASH160 pipelines that need to process many independent 32-byte
 SHA-256 digests at once.
 
 The library combines a portable pure-Go scalar implementation with a real
-Go-assembly SIMD backend. On arm64, the hand-tuned 4-lane NEON kernel is the
-default and is about **3x faster than scalar** on Apple M3 while keeping the hot
-path zero-allocation.
+Go-assembly SIMD backend. On arm64, runtime dispatch selects a 4-lane NEON
+kernel, with a shorter SHA3 instruction sequence when the CPU supports it.
+The fixed-32-byte scalar path is also unrolled; all `Hash32` paths allocate
+nothing. The local Apple M5 Pro measurements are recorded below.
 
 This is free and open-source software released under the permissive
 MIT license.
@@ -52,7 +53,7 @@ business model.
 
 - **Batched RIPEMD-160 for Go** through `Hash32(dst, src, n)`.
 - **Bitcoin HASH160 ready** for `RIPEMD160(SHA256(x))` pipelines.
-- **arm64 NEON SIMD backend** with 4 parallel lanes and runtime dispatch.
+- **arm64 NEON/SHA3 SIMD backends** with 4 parallel lanes and runtime dispatch.
 - **Portable scalar fallback** for every supported Go architecture.
 - **Zero allocations** on the `Hash32` hot path.
 - **Concurrent-safe API** with no package-level mutable hashing state.
@@ -185,14 +186,17 @@ Runtime dispatch selects the fastest implemented backend once during package
 initialization. `Backend()` always reports the kernel that actually executes:
 
 
-| Backend  | GOARCH  | Lanes | Status                         |
-| -------- | ------- | ----- | ------------------------------ |
-| `neon`   | `arm64` | 4     | implemented, default on arm64  |
-| `scalar` | all     | 1     | implemented, portable fallback |
+| Backend     | GOARCH  | Lanes | Status                                  |
+| ----------- | ------- | ----- | --------------------------------------- |
+| `neon-sha3` | `arm64` | 4     | default when FEAT_SHA3 is available      |
+| `neon`      | `arm64` | 4     | default on arm64 without FEAT_SHA3       |
+| `scalar`    | all     | 1     | unrolled fixed-width portable fallback  |
 
 
-Set `GORIPEMD160MB_FORCE=scalar` or `GORIPEMD160MB_FORCE=neon` to pin a backend
-for testing or benchmarking. Unknown or unsupported values fall back to scalar.
+Set `GORIPEMD160MB_FORCE=scalar`, `neon`, or `neon-sha3` to pin a backend.
+Unknown or unsupported values fall back to scalar. An explicit SHA3 request
+cannot bypass the CPU capability check. Darwin uses the positive
+`hw.optional.arm.FEAT_SHA3` sysctl result; other arm64 platforms use `x/sys/cpu`.
 
 amd64 SIMD kernels (SSE2, AVX2, AVX-512) are planned but not yet implemented,
 so amd64 currently runs scalar. The NEON generator in
@@ -202,35 +206,47 @@ oracle before it is wired into dispatch.
 
 ## Performance
 
-Latest local Apple M3 smoke benchmark:
+Local Apple M5 Pro measurements, 2026-10-04:
 
 ```text
 GOMAXPROCS=1
 n = 2048
+Go 1.22.5, darwin/arm64
+6 samples per case, 200ms benchmark duration
 ```
 
 
-| Backend | ns/op  | MB/s   | hashes/s   | allocs/op |
-| ------- | ------ | ------ | ---------- | --------- |
-| scalar  | 470680 | 139.18 | 4,349,526  | 0         |
-| neon    | 155403 | 421.06 | 13,158,076 | 0         |
+| Backend   | Median ns/op | hashes/s   | allocs/op |
+| --------- | ------------ | ---------- | --------- |
+| scalar    | 238300       | 8,594,000  | 0         |
+| neon      | 91630        | 22,350,000 | 0         |
+| neon-sha3 | 82780        | 24,740,000 | 0         |
 
 
-The arm64 NEON backend delivers about **3.0x** the scalar throughput for this
-large-batch workload, with zero allocations on both paths.
+These results apply to this M5 Pro and Go 1.22.5. On Go 1.27.1 the same
+`neon-sha3` case, now hashing eight messages per iteration, measures 41.85M
+hashes/s at n=2048 (67.41% above the four-lane kernel, `p=0.008`, five
+samples). `Lanes()` remains 4. The three accepted four-lane changes
+are shorter NEON boolean sequences, SHA3 boolean instructions with adjusted
+round constants, and independent preparation of the message/additive terms.
+The scalar tail uses constant rotations and omits the fixed padding's zero
+words. Before/after samples and `benchstat` comparisons are in
+[benchmarks/2026-10-04](benchmarks/2026-10-04/README.md).
 
 Reproduce and compare results with:
 
 ```sh
 GOMAXPROCS=1 GORIPEMD160MB_FORCE=scalar \
-	go test -run '^$' -bench '^BenchmarkHash32$' -benchmem -count=10 ./ \
+	go test -run '^$' -bench '^BenchmarkHash32/scalar/' -benchmem -count=10 ./ \
 	| tee scalar.txt
 
 GOMAXPROCS=1 GORIPEMD160MB_FORCE=neon \
-	go test -run '^$' -bench '^BenchmarkHash32$' -benchmem -count=10 ./ \
+	go test -run '^$' -bench '^BenchmarkHash32/neon/' -benchmem -count=10 ./ \
 	| tee neon.txt
 
-benchstat scalar.txt neon.txt
+GOMAXPROCS=1 GORIPEMD160MB_FORCE=neon-sha3 \
+	go test -run '^$' -bench '^BenchmarkHash32/neon-sha3/' -benchmem -count=10 ./ \
+	| tee neon-sha3.txt
 ```
 
 The full methodology, profiling workflow, and release criteria live in
@@ -259,6 +275,7 @@ and batched performance, not for inventing new cryptographic constructions.
 go test ./...                                   # all packages, native backend
 GORIPEMD160MB_FORCE=scalar go test ./...        # force the scalar oracle
 go test -race ./...                             # data-race detector
+GORIPEMD160MB_FORCE=neon-sha3 go test ./...       # SHA3 when supported
 ```
 
 Coverage of the importable library packages (root plus `hash160`):

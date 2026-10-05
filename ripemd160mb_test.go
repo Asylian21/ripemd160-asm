@@ -145,6 +145,8 @@ func FuzzSum(f *testing.F) {
 		nil,
 		[]byte("a"),
 		[]byte("abc"),
+		make([]byte, 32),
+		bytes.Repeat([]byte{0xff}, 32),
 		bytes.Repeat([]byte("a"), 100),
 	} {
 		f.Add(seed)

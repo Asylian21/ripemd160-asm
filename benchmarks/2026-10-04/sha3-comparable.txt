@@ -1,0 +1,21 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/Asylian21/ripemd160-asm
+BenchmarkHash32/neon/n=4    	 1000000	       203.8 ns/op	 627.95 MB/s	  19623475 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=5    	  786734	       308.7 ns/op	 518.29 MB/s	  16196707 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048 	    2304	    104007 ns/op	 630.11 MB/s	  19690924 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=4    	 1000000	       203.9 ns/op	 627.79 MB/s	  19618406 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=5    	  780487	       309.4 ns/op	 517.16 MB/s	  16161195 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048 	    2317	    103875 ns/op	 630.91 MB/s	  19716121 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=4    	 1000000	       204.3 ns/op	 626.66 MB/s	  19583024 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=5    	  786380	       308.3 ns/op	 519.01 MB/s	  16219034 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048 	    2305	    103876 ns/op	 630.90 MB/s	  19715816 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=4    	 1000000	       204.0 ns/op	 627.51 MB/s	  19609678 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=5    	  787024	       308.3 ns/op	 518.91 MB/s	  16215856 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048 	    2317	    104439 ns/op	 627.50 MB/s	  19609580 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=4    	 1000000	       203.7 ns/op	 628.50 MB/s	  19640706 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=5    	  770568	       308.2 ns/op	 519.13 MB/s	  16222718 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048 	    2307	    103815 ns/op	 631.28 MB/s	  19727461 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=4    	 1000000	       203.8 ns/op	 628.19 MB/s	  19631019 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=5    	  781228	       308.6 ns/op	 518.50 MB/s	  16203049 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048 	    2316	    103961 ns/op	 630.39 MB/s	  19699737 hashes/s	       0 B/op	       0 allocs/op

@@ -90,27 +90,6 @@ func scalarHash32(dst, src []byte, n int) {
 	}
 }
 
-func sum32(dst, src []byte) {
-	var x [16]uint32
-	x[0] = binary.LittleEndian.Uint32(src[0:4])
-	x[1] = binary.LittleEndian.Uint32(src[4:8])
-	x[2] = binary.LittleEndian.Uint32(src[8:12])
-	x[3] = binary.LittleEndian.Uint32(src[12:16])
-	x[4] = binary.LittleEndian.Uint32(src[16:20])
-	x[5] = binary.LittleEndian.Uint32(src[20:24])
-	x[6] = binary.LittleEndian.Uint32(src[24:28])
-	x[7] = binary.LittleEndian.Uint32(src[28:32])
-	x[8] = 0x80
-	x[14] = 32 * 8
-
-	h0, h1, h2, h3, h4 := compress(init0, init1, init2, init3, init4, &x)
-	binary.LittleEndian.PutUint32(dst[0:4], h0)
-	binary.LittleEndian.PutUint32(dst[4:8], h1)
-	binary.LittleEndian.PutUint32(dst[8:12], h2)
-	binary.LittleEndian.PutUint32(dst[12:16], h3)
-	binary.LittleEndian.PutUint32(dst[16:20], h4)
-}
-
 func block(dig *digest, p []byte) {
 	var x [16]uint32
 	for len(p) >= BlockSize {

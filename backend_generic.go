@@ -12,3 +12,5 @@ func bestBackend() backend { return scalarBackend() }
 // vectorBackend reports no implemented vector backends on these architectures,
 // so any named request falls back to scalar.
 func vectorBackend(string) (backend, bool) { return backend{}, false }
+
+func sha3Available() bool { return false }

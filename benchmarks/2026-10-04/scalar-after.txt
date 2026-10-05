@@ -1,0 +1,40 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/Asylian21/ripemd160-asm
+BenchmarkHash32/scalar/n=1         	 1754187	       114.5 ns/op	 279.37 MB/s	   8730377 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/scalar/n=1         	 2100171	       114.0 ns/op	 280.67 MB/s	   8770997 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/scalar/n=1         	 2083519	       115.0 ns/op	 278.17 MB/s	   8692947 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/scalar/n=1         	 1986183	       118.5 ns/op	 270.06 MB/s	   8439442 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/scalar/n=1         	 2094432	       114.8 ns/op	 278.87 MB/s	   8714604 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/scalar/n=1         	 2097151	       114.4 ns/op	 279.73 MB/s	   8741482 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/scalar/n=2048      	    1010	    236367 ns/op	 277.26 MB/s	   8664560 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/scalar/n=2048      	    1004	    240041 ns/op	 273.02 MB/s	   8531944 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/scalar/n=2048      	     975	    241856 ns/op	 270.97 MB/s	   8467842 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/scalar/n=2048      	     981	    239922 ns/op	 273.16 MB/s	   8536104 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/scalar/n=2048      	    1023	    236158 ns/op	 277.51 MB/s	   8672172 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/scalar/n=2048      	    1012	    236701 ns/op	 276.87 MB/s	   8652302 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=1           	 2046494	       115.9 ns/op	 275.98 MB/s	   8624568 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=1           	 1980985	       115.9 ns/op	 276.00 MB/s	   8625107 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=1           	 2069922	       115.8 ns/op	 276.42 MB/s	   8638264 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=1           	 2052322	       115.7 ns/op	 276.52 MB/s	   8641457 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=1           	 2074827	       115.5 ns/op	 277.04 MB/s	   8657568 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=1           	 2068707	       116.5 ns/op	 274.64 MB/s	   8582518 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=4           	 1000000	       225.2 ns/op	 568.35 MB/s	  17760974 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=4           	  985238	       223.8 ns/op	 571.82 MB/s	  17869516 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=4           	 1000000	       222.4 ns/op	 575.54 MB/s	  17985729 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=4           	 1000000	       222.4 ns/op	 575.63 MB/s	  17988469 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=4           	 1000000	       221.8 ns/op	 577.07 MB/s	  18033455 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=4           	 1000000	       221.8 ns/op	 577.08 MB/s	  18033842 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=5           	  735903	       331.9 ns/op	 482.03 MB/s	  15063578 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=5           	  728947	       332.2 ns/op	 481.68 MB/s	  15052432 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=5           	  704802	       331.5 ns/op	 482.67 MB/s	  15083413 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=5           	  722437	       330.0 ns/op	 484.81 MB/s	  15150475 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=5           	  728689	       330.3 ns/op	 484.48 MB/s	  15139980 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=5           	  715536	       330.9 ns/op	 483.60 MB/s	  15112493 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048        	    2104	    112754 ns/op	 581.23 MB/s	  18163560 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048        	    2131	    113327 ns/op	 578.29 MB/s	  18071633 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048        	    2119	    115321 ns/op	 568.29 MB/s	  17759127 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048        	    2095	    113339 ns/op	 578.23 MB/s	  18069688 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048        	    2127	    113221 ns/op	 578.83 MB/s	  18088510 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048        	    2079	    114702 ns/op	 571.36 MB/s	  17855041 hashes/s	       0 B/op	       0 allocs/op
+PASS

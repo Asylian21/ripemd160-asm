@@ -1,0 +1,48 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/Asylian21/ripemd160-asm
+BenchmarkHash32/neon/n=4         	 1100988	       188.1 ns/op	 680.38 MB/s	  21261748 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048      	    2535	     95117 ns/op	 689.00 MB/s	  21531300 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon-sha3/n=4    	 1443196	       163.8 ns/op	 781.21 MB/s	  24412878 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon-sha3/n=2048 	    2857	     82710 ns/op	 792.36 MB/s	  24761237 hashes/s	       0 B/op	       0 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/Asylian21/ripemd160-asm
+BenchmarkHash32/neon/n=4         	 1330393	       179.8 ns/op	 711.96 MB/s	  22248871 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048      	    2650	     91646 ns/op	 715.10 MB/s	  22347081 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon-sha3/n=4    	 1459468	       164.0 ns/op	 780.29 MB/s	  24384242 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon-sha3/n=2048 	    2893	     82854 ns/op	 790.98 MB/s	  24718067 hashes/s	       0 B/op	       0 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/Asylian21/ripemd160-asm
+BenchmarkHash32/neon/n=4         	 1338896	       179.0 ns/op	 715.16 MB/s	  22348763 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048      	    2642	     90802 ns/op	 721.75 MB/s	  22554656 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon-sha3/n=4    	 1467924	       163.1 ns/op	 784.97 MB/s	  24530277 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon-sha3/n=2048 	    2881	     82529 ns/op	 794.09 MB/s	  24815407 hashes/s	       0 B/op	       0 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/Asylian21/ripemd160-asm
+BenchmarkHash32/neon/n=4         	 1325894	       180.6 ns/op	 708.76 MB/s	  22148710 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048      	    2635	     91617 ns/op	 715.33 MB/s	  22354073 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon-sha3/n=4    	 1462872	       164.1 ns/op	 780.21 MB/s	  24381509 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon-sha3/n=2048 	    2880	     82921 ns/op	 790.35 MB/s	  24698364 hashes/s	       0 B/op	       0 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/Asylian21/ripemd160-asm
+BenchmarkHash32/neon/n=4         	 1314530	       180.9 ns/op	 707.74 MB/s	  22117083 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048      	    2618	     91061 ns/op	 719.69 MB/s	  22490410 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon-sha3/n=4    	 1466967	       163.1 ns/op	 784.85 MB/s	  24526624 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon-sha3/n=2048 	    2895	     82476 ns/op	 794.60 MB/s	  24831442 hashes/s	       0 B/op	       0 allocs/op
+PASS
+goos: darwin
+goarch: arm64
+pkg: github.com/Asylian21/ripemd160-asm
+BenchmarkHash32/neon/n=4         	 1328089	       180.6 ns/op	 708.83 MB/s	  22150965 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon/n=2048      	    2592	     93893 ns/op	 697.99 MB/s	  21812136 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon-sha3/n=4    	 1440558	       166.6 ns/op	 768.22 MB/s	  24006941 hashes/s	       0 B/op	       0 allocs/op
+BenchmarkHash32/neon-sha3/n=2048 	    2851	     82929 ns/op	 790.27 MB/s	  24696002 hashes/s	       0 B/op	       0 allocs/op
+PASS

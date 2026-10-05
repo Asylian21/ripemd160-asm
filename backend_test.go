@@ -8,8 +8,9 @@ import (
 // knownLanes maps every backend name the library may report to its required
 // lane count. Backend() and Lanes() must always agree with this table.
 var knownLanes = map[string]int{
-	"scalar": 1,
-	"neon":   4,
+	"scalar":    1,
+	"neon":      4,
+	"neon-sha3": 4,
 }
 
 // TestBackendAndLanesConsistent checks that the reported backend name is one of

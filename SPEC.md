@@ -62,8 +62,10 @@ A count of `n == 0` is always a valid no-op and tolerates nil buffers.
 
 Implemented backends:
 
-- `scalar`: pure-Go fallback and correctness oracle (1 lane). Default off arm64.
-- `neon`: arm64 4-lane Advanced SIMD backend. Default on arm64.
+- `scalar`: unrolled pure-Go fixed-width fallback (1 lane). Default off arm64.
+- `neon`: arm64 4-lane Advanced SIMD backend. Default without FEAT_SHA3.
+- `neon-sha3`: arm64 4-lane kernel using SHA3 EOR3/BCAX instructions.
+  Default when the CPU advertises FEAT_SHA3.
 
 amd64 SIMD kernels (SSE2/AVX2/AVX-512) are planned but not yet implemented;
 amd64 currently runs the scalar backend. A backend is only advertised — and only
@@ -71,7 +73,11 @@ selectable — once it has a real kernel verified bit-for-bit against the scalar
 oracle, so `Backend()` never reports a SIMD name while secretly running scalar.
 
 The active backend is chosen once at package initialization.
-`GORIPEMD160MB_FORCE` may be set to `scalar` or `neon` to pin a backend.
+`GORIPEMD160MB_FORCE` may be set to `scalar`, `neon`, or `neon-sha3`.
+The SHA3 capability check applies to both default and explicit selection;
+forcing an unavailable SHA3 kernel falls back to scalar. Darwin requires a
+positive `hw.optional.arm.FEAT_SHA3` sysctl response; other arm64 platforms use
+`golang.org/x/sys/cpu`.
 Selection rules:
 
 - empty string or `auto`: choose the fastest backend implemented for the
@@ -82,7 +88,7 @@ Selection rules:
   Selection never panics.
 
 `Backend()` returns the active backend name and `Lanes()` returns its lane
-count (always `1` for scalar, `4` for neon). The two always agree, and the
+count (always `1` for scalar, `4` for neon and neon-sha3). The two always agree, and the
 reported backend is always the kernel that actually executes.
 
 ## Quality bar
@@ -101,5 +107,6 @@ reported backend is always the kernel that actually executes.
 - `gofmt`, `go vet`, and `staticcheck` are clean, and `go generate` produces no
   diff.
 
-The NEON code generator (`internal/neongen`) is validated by the `go generate` +
-clean-tree check rather than by statement coverage.
+The generator (`internal/neongen`) emits the base NEON assembly, SHA3 assembly,
+and portable fixed-width scalar compressor. It is validated by the
+`go generate` + clean-tree check rather than by statement coverage.
