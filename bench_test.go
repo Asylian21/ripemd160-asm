@@ -14,7 +14,7 @@ func benchCounts(lanes int) []int {
 	if lanes > 1 {
 		ns = append(ns, lanes-1, lanes, lanes+1)
 	}
-	return append(ns, 64, 1024, 2048)
+	return append(ns, 8, 9, 12, 16, 64, 1024, 2048)
 }
 
 func BenchmarkHash32(b *testing.B) {

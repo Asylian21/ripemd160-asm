@@ -25,22 +25,35 @@ func neonSHA3Backend() backend {
 // The reported lane count stays 4: a multiple of 4 but not of 8 is finished by
 // the four-message kernel, and 1..3 messages stay on the scalar tail. Batches
 // of 8 or more run two independent four-lane groups per iteration.
+// Hash32 has validated the buffers; the kernels access exactly n messages.
+// Concrete calls avoid function-value dispatch and aligned calls need no
+// additional slice bounds checks.
 func hash32NEONWide(dst, src []byte, n int) {
-	hash32Wide(dst, src, n, hash32NEON8, hash32NEON)
+	n8 := n &^ 7
+	if n8 == n {
+		hash32NEON8(dst, src, n)
+		return
+	}
+	if n8 == 0 {
+		hash32NEON(dst, src, n)
+		return
+	}
+	hash32NEON8(dst, src, n8)
+	hash32NEON(dst[n8*Size:], src[n8*32:], n-n8)
 }
 
 func hash32NEONSHA3Wide(dst, src []byte, n int) {
-	hash32Wide(dst, src, n, hash32NEON8SHA3, hash32NEONSHA3)
-}
-
-func hash32Wide(dst, src []byte, n int, wide, narrow hash32Func) {
 	n8 := n &^ 7
-	if n8 > 0 {
-		wide(dst[:n8*Size], src[:n8*32], n8)
+	if n8 == n {
+		hash32NEON8SHA3(dst, src, n)
+		return
 	}
-	if n8 != n {
-		narrow(dst[n8*Size:], src[n8*32:], n-n8)
+	if n8 == 0 {
+		hash32NEONSHA3(dst, src, n)
+		return
 	}
+	hash32NEON8SHA3(dst, src, n8)
+	hash32NEONSHA3(dst[n8*Size:], src[n8*32:], n-n8)
 }
 
 // vectorBackend only exposes kernels that are safe on the running CPU. An

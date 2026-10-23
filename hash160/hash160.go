@@ -33,10 +33,12 @@ func Hash160_32(dst, src []byte, n, width int) {
 	if width < 0 {
 		panic("hash160: negative message width")
 	}
-	if len(src) < n*width {
+	// Validate counts before multiplying so huge values cannot wrap and pass
+	// the buffer checks. width == 0 represents n independent empty messages.
+	if width > 0 && n > len(src)/width {
 		panic("hash160: src too short")
 	}
-	if len(dst) < n*ripemd160mb.Size {
+	if n > len(dst)/ripemd160mb.Size {
 		panic("hash160: dst too short")
 	}
 	if n == 0 {

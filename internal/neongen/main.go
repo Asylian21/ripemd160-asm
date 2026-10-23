@@ -410,8 +410,7 @@ func kernel8(sha3 bool) []byte {
 		g0Hi  = 27
 		g1Lo  = 0
 		g1Hi  = 11
-		bufSp = 256 // message buffer bytes; spill follows it
-		frame = 512
+		frame = 288 // 256-byte message buffer plus at most 31 bytes of alignment
 	)
 	var b strings.Builder
 	p := func(format string, args ...any) { fmt.Fprintf(&b, format+"\n", args...) }
@@ -436,7 +435,8 @@ func kernel8(sha3 bool) []byte {
 	p("\tCBZ\tR2, done")
 	// msg-frame(SP) is the local buffer. The Go prologue places it 8 bytes above
 	// a 16-byte-aligned RSP, so round it up to 32 bytes before the 32-byte
-	// word loads. The frame has room for that pad plus the 416 bytes we use.
+	// word loads. Finalization stays in each group's registers, so no spill
+	// area is needed beside the 256-byte message buffer.
 	p("\tMOVD\t$msg-%d(SP), R8", frame)
 	p("\tADD\t$31, R8, R8")
 	p("\tBIC\t$31, R8, R8")
@@ -498,17 +498,9 @@ func kernel8(sha3 bool) []byte {
 		assertPool(right1, g1Lo, g1Hi)
 	}
 
-	p("\t// Park group 1 while group 0 is finalized into V0..V4.")
-	spillLive(&b, []int{left1[0], left1[1], left1[2], left1[3], left1[4], right1[0], right1[1], right1[2], right1[3], right1[4]})
-	combine(&b, left0, right0)
-	store(&b)
-	p("\t// Reload group 1 into the register layout combine expects.")
-	for i := 0; i < 10; i++ {
-		addr(&b, bufSp+i*16, "R3")
-		p("\tVLD1\t(R3), [V%d.B16]", 16+i)
-	}
-	combine(&b, [5]int{16, 17, 18, 19, 20}, [5]int{21, 22, 23, 24, 25})
-	store(&b)
+	p("\t// Finalize each group in its own pool, preserving the other group's state.")
+	storeGroup(&b, combineGroup(&b, left0, right0, 28), right0)
+	storeGroup(&b, combineGroup(&b, left1, right1, 28), right1)
 	p("")
 	p("\tADD\t$256, R1")
 	p("\tSUBS\t$8, R2")
@@ -587,15 +579,6 @@ func dumpWords(b *strings.Builder, hi int) {
 	}
 }
 
-func spillLive(b *strings.Builder, regs []int) {
-	for i, r := range regs {
-		addr(b, bufSpill(i), "R3")
-		fmt.Fprintf(b, "\tVST1\t[V%d.B16], (R3)\n", r)
-	}
-}
-
-func bufSpill(i int) int { return 256 + i*16 }
-
 func addr(b *strings.Builder, off int, dst string) {
 	if off == 0 {
 		fmt.Fprintf(b, "\tMOVD\tR8, %s\n", dst)
@@ -655,6 +638,39 @@ func emitCombineWord(b *strings.Builder, out int, ivTerm uint32, left, right int
 	bcast(b, ivTerm, 5)
 	p("\tVADD\tV%d.S4, V5.S4, V%d.S4", left, out)
 	p("\tVADD\tV%d.S4, V%d.S4, V%d.S4", right, out, out)
+}
+
+// combineGroup finalizes into the left pipeline's own registers. Each left and
+// right state word contributes to exactly one digest word, so overwriting a
+// left word after its sum is safe. scratch is outside both groups' state pools.
+func combineGroup(b *strings.Builder, l, r [5]int, scratch int) [5]int {
+	out := [5]int{l[2], l[3], l[4], l[0], l[1]}
+	for i, right := range [5]int{r[3], r[4], r[0], r[1], r[2]} {
+		bcast(b, iv[(i+1)%5], scratch)
+		fmt.Fprintf(b, "\tVADD\tV%d.S4, V%d.S4, V%d.S4\n", right, out[i], out[i])
+		fmt.Fprintf(b, "\tVADD\tV%d.S4, V%d.S4, V%d.S4\n", scratch, out[i], out[i])
+	}
+	return out
+}
+
+// storeGroup uses the dead right pipeline for transpose intermediates, then
+// reuses the first four digest-word registers for message-major outputs. This
+// never touches the other group's state and avoids spilling it to the stack.
+func storeGroup(b *strings.Builder, words, scratch [5]int) {
+	p := func(format string, args ...any) { fmt.Fprintf(b, format+"\n", args...) }
+	p("\tVZIP1\tV%d.S4, V%d.S4, V%d.S4", words[1], words[0], scratch[0])
+	p("\tVZIP2\tV%d.S4, V%d.S4, V%d.S4", words[1], words[0], scratch[1])
+	p("\tVZIP1\tV%d.S4, V%d.S4, V%d.S4", words[3], words[2], scratch[2])
+	p("\tVZIP2\tV%d.S4, V%d.S4, V%d.S4", words[3], words[2], scratch[3])
+	p("\tVZIP1\tV%d.D2, V%d.D2, V%d.D2", scratch[2], scratch[0], words[0])
+	p("\tVZIP2\tV%d.D2, V%d.D2, V%d.D2", scratch[2], scratch[0], words[1])
+	p("\tVZIP1\tV%d.D2, V%d.D2, V%d.D2", scratch[3], scratch[1], words[2])
+	p("\tVZIP2\tV%d.D2, V%d.D2, V%d.D2", scratch[3], scratch[1], words[3])
+	for lane, vreg := range words[:4] {
+		p("\tVST1.P\t[V%d.B16], 16(R0)", vreg)
+		p("\tVMOV\tV%d.S[%d], R3", words[4], lane)
+		p("\tMOVWU.P\tR3, 4(R0)")
+	}
 }
 
 // store transposes the digest words in V0..V4 back to message-major order and

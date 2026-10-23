@@ -17,6 +17,15 @@ These throughput measurements cover the M5 Pro only; cross-compilation on
 other architectures verifies buildability, not their runtime speed.
 amd64 SIMD is not yet implemented and runs scalar.
 
+The 2026-10-05 follow-up measured concrete assembly dispatch on the same M5
+Pro with Go 1.27.1, `-pgo=off` and `GOMAXPROCS=1`. Ten paired samples showed
+`neon-sha3` call latency decreasing from 164.5 to 162.0 ns at `n = 4`
+(-1.52%) and from 196.5 to 194.6 ns at `n = 8` (-0.99%), both `p < 0.001`.
+Throughput at `n = 2048` remained 41.83M hashes/s (`p = 0.739`), with zero
+allocations throughout. Keeping finalization in each group's register pool
+also reduced the eight-message kernel frame from 512 to 288 bytes, without a
+statistically significant large-batch throughput change.
+
 ## What to measure
 
 The hot path is `Hash32`. The benchmarks report four quantities per case:

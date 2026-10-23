@@ -2,6 +2,14 @@
 
 ## v0.2.0 - 2026-10-05
 
+- Eight-message kernels finalize and transpose each group in its own register
+  pool, removing ten state-register spills and reloads per iteration and
+  reducing the local frame from 512 to 288 bytes. Differential tests cover
+  every count from 0 through 40 at all 16 byte alignments on each backend.
+- Four/eight-message dispatch calls the assembly kernels directly, with
+  aligned counts avoiding redundant reslicing of already-validated buffers.
+- The `hash160.Hash160_32` convenience wrapper rejects overflowing source and
+  destination length products before allocation, including width-zero calls.
 - Shorter base NEON boolean sequences and independent preparation of the
   message/additive terms reduce the round dependency chain.
 - Optional `neon-sha3` backend uses EOR3 and BCAX with complemented round

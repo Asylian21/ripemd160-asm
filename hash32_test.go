@@ -84,6 +84,44 @@ func TestHash32BitPatterns(t *testing.T) {
 	}
 }
 
+// Exhaustively cross the four- and eight-message dispatch boundaries. Distinct
+// messages expose lane/group swaps in finalization; all SIMD alignments and
+// guarded output slices expose accidental clobbering or out-of-bounds stores.
+func TestHash32ShortBatchesEveryAlignment(t *testing.T) {
+	for _, name := range availableBackendsForTest() {
+		t.Run(name, func(t *testing.T) {
+			withBackend(t, name, func() {
+				for n := 0; n <= 40; n++ {
+					srcData := make([]byte, n*32)
+					want := make([]byte, n*Size)
+					for i := range srcData {
+						srcData[i] = byte((i*37 + i/32*13 + n*19) ^ (i >> 3))
+					}
+					for i := 0; i < n; i++ {
+						copy(want[i*Size:], referenceSum(srcData[i*32:(i+1)*32]))
+					}
+					for offset := 0; offset < 16; offset++ {
+						src := bytes.Repeat([]byte{0xab}, offset+len(srcData)+16)
+						copy(src[offset:], srcData)
+						dst := bytes.Repeat([]byte{0xcd}, offset+len(want)+16)
+						Hash32(dst[offset:offset+len(want)], src[offset:offset+len(srcData)], n)
+						if !bytes.Equal(dst[offset:offset+len(want)], want) {
+							t.Fatalf("n=%d offset=%d: wrong digest group or lane", n, offset)
+						}
+						if !bytes.Equal(dst[:offset], bytes.Repeat([]byte{0xcd}, offset)) ||
+							!bytes.Equal(dst[offset+len(want):], bytes.Repeat([]byte{0xcd}, 16)) {
+							t.Fatalf("n=%d offset=%d: wrote outside output", n, offset)
+						}
+						if !bytes.Equal(src[offset:offset+len(srcData)], srcData) {
+							t.Fatalf("n=%d offset=%d: modified input", n, offset)
+						}
+					}
+				}
+			})
+		})
+	}
+}
+
 // TestHash32AgreesWithSum verifies that the batched fast path and the
 // single-message Sum entry point are interchangeable for 32-byte inputs across
 // every backend, which is the invariant Hash160 pipelines rely on.

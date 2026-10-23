@@ -140,6 +140,35 @@ func TestHash160_32Panics(t *testing.T) {
 	}
 }
 
+// Validation must reject overflowing length products before allocation or any
+// output write. Both nonempty messages and width-zero messages are covered.
+func TestHash160_32RejectsOverflowingCounts(t *testing.T) {
+	maxInt := int(^uint(0) >> 1)
+	for _, tc := range []struct {
+		name      string
+		n, width  int
+		wantPanic string
+	}{
+		{"source-product-wraps", maxInt/2 + 1, 2, "hash160: src too short"},
+		{"source-product-negative", 2, maxInt, "hash160: src too short"},
+		{"destination-product-wraps", maxInt/2 + 1, 0, "hash160: dst too short"},
+		{"destination-product-negative", maxInt, 0, "hash160: dst too short"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			dst := bytes.Repeat([]byte{0xcd}, ripemd160mb.Size)
+			defer func() {
+				if got := recover(); got != tc.wantPanic {
+					t.Fatalf("panic = %v, want %q before allocation", got, tc.wantPanic)
+				}
+				if !bytes.Equal(dst, bytes.Repeat([]byte{0xcd}, len(dst))) {
+					t.Fatal("validation modified the output")
+				}
+			}()
+			hash160.Hash160_32(dst, []byte{0x42}, tc.n, tc.width)
+		})
+	}
+}
+
 // FuzzHash160_32 derives a width and message count from arbitrary fuzz input
 // and asserts every digest matches the oracle.
 func FuzzHash160_32(f *testing.F) {
